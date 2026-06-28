@@ -1,0 +1,105 @@
+package com.example.proyectofinal_movilesi.data
+
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.POST
+import retrofit2.http.Query
+
+interface QuinielaApi {
+
+    @POST("api/login")
+    suspend fun login(@Body request: LoginRequest): LoginResponse
+
+    @GET("api/profile")
+    suspend fun obtenerPerfil(@Header("Authorization") token: String): PerfilResponse
+
+    @GET("api/groups")
+    suspend fun obtenerMisGrupos(@Header("Authorization") token: String): List<GrupoResponse>
+
+    // Agregamos el endpoint para los próximos partidos[cite: 1]
+    @GET("api/matches")
+    suspend fun obtenerProximosPartidos(
+        @Header("Authorization") token: String,
+        @Query("next") next: Boolean = true
+    ): List<PartidoResponse>
+
+    @POST("groups")
+    suspend fun crearGrupo(
+        @Header("Authorization") token: String,
+        @Body request: CrearGrupoRequest
+    ): CrearGrupoResponse
+
+    @POST("groups/join")
+    suspend fun unirseAGrupo(
+        @Header("Authorization") token: String,
+        @Body request: UnirseGrupoRequest
+    ): UnirseGrupoResponse
+
+    // Agrega esto junto a tus otros @GET o @POST
+    @GET("api/matches") // <-- O prueba así
+    suspend fun obtenerTodosLosPartidos(
+        @Header("Authorization") token: String
+    ): List<PartidoResponse>
+
+    @POST("api/predictions")
+    suspend fun registrarPrediccion(
+        @Header("Authorization") token: String,
+        @Body request: PrediccionRequest
+    ): PrediccionResponse
+
+    // 3. Obtener todas las predicciones del usuario [cite: 154]
+    @GET("api/predictions/me")
+    suspend fun obtenerMisPredicciones(
+        @Header("Authorization") token: String
+    ): List<PrediccionResponse>
+
+}
+
+
+// Data Classes
+data class LoginRequest(val email: String, val password: String)
+data class LoginResponse(val token: String, val name: String, val email: String)
+data class PerfilResponse(val name: String, val email: String, val total_score: Int, val groups_count: Int, val predictions_count: Int)
+data class GrupoResponse(val id: Int, val name: String, val participants_count: Int, val user_score: Int, val invite_code: String)
+data class PartidoResponse(
+    val id: Int,
+    val home_team: String,
+    val away_team: String,
+    val match_date: String,
+    val phase: String,
+    val status: String,
+    val home_score: Int? = null,
+    val away_score: Int? = null
+)
+
+data class CrearGrupoRequest(val name: String)
+data class UnirseGrupoRequest(val invite_code: String)
+
+data class CrearGrupoResponse(
+    val id: Int,
+    val name: String,
+    val invite_code: String,
+    val created_at: String
+)
+
+data class UnirseGrupoResponse(
+    val message: String,
+    val group: GrupoResponse
+)
+
+data class PrediccionRequest(
+    val match_id: Int,
+    val home_score: Int,
+    val away_score: Int
+)
+
+data class PrediccionResponse(
+    val id: Int? = null,
+    val match_id: Int,
+    val home_score: Int,
+    val away_score: Int,
+    val status: String? = null,
+    val points_earned: Int? = null
+)
+
