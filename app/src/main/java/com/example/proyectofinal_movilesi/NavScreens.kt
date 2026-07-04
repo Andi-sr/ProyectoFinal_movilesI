@@ -17,6 +17,8 @@ import com.example.proyectofinal_movilesi.screens.PartidosScreen
 import com.example.proyectofinal_movilesi.screens.PrincipalScreen // Tu pantalla intacta
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 import com.example.proyectofinal_movilesi.screens.PerfilScreen
+import com.example.proyectofinal_movilesi.screens.MapaSedesScreen
+import com.example.proyectofinal_movilesi.screens.DetalleEstadioScreen
 @Composable
 fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
     val navController = rememberNavController()
@@ -47,7 +49,7 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
             )
         }
 
-        // 2. PRINCIPAL (Respetando tu código al 100%)
+        // 2. PRINCIPAL
         composable("principal") {
             PrincipalScreen(
                 estado = estado,
@@ -60,6 +62,9 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
                 },
                 onNavegarPerfil = {
                     navController.navigate("perfil")
+                },
+                onNavegarMapa = {
+                    navController.navigate("mapa_sedes")
                 }
             )
         }
@@ -134,6 +139,20 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
                 }
             )
 
+        }
+        composable("mapa_sedes") {
+            MapaSedesScreen(
+                onNavegarDetalleEstadio = {
+                    navController.navigate("detalle_estadio")
+                }
+            )
+        }
+        composable("detalle_estadio") {
+            DetalleEstadioScreen(
+                onVolver = {
+                    navController.popBackStack()
+                }
+            )
         }
 
     }

@@ -174,4 +174,36 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
             }
         }
     }
+    fun guardarPronostico(
+        partidoId: Int,
+        golesLocal: Int,
+        golesVisitante: Int,
+        onExito: () -> Unit
+    ) {
+        val token = _estado.value.tokenAcceso ?: return
+
+        viewModelScope.launch {
+            try {
+                repositorio.registrarPrediccion(
+                    token = token,
+                    partidoId = partidoId,
+                    golesLocal = golesLocal,
+                    golesVisitante = golesVisitante
+                )
+
+                onExito()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+
+                android.util.Log.e(
+                    "PRONOSTICO_ERROR",
+                    e.message ?: "Error",
+                    e
+                )
+
+                println(e.message)
+            }
+        }
+    }
 }

@@ -52,7 +52,12 @@ dependencies {
     // Retrofit & Gson para consumir la API REST
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // Google Maps Compose
+    implementation("com.google.maps.android:maps-compose:6.1.0")
 
+    // Servicios de ubicación
+    implementation("com.google.android.gms:play-services-maps:19.2.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     // Room para la base de datos local
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")

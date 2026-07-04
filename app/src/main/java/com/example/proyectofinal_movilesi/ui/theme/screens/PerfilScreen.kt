@@ -1,20 +1,23 @@
 package com.example.proyectofinal_movilesi.screens
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaState
 
 @Composable
@@ -23,87 +26,160 @@ fun PerfilScreen(
     onCerrarSesion: () -> Unit
 ) {
 
+    val fondo = Color(0xFF121A16)
+    val tarjeta = Color(0xFF1B2A22)
+    val verde = Color(0xFFA5D6A7)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(fondo)
             .padding(20.dp),
-
-        horizontalAlignment = Alignment.CenterHorizontally,
-
-        verticalArrangement = Arrangement.Top
-
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .clip(CircleShape)
+                .background(verde),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.Person,
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.size(60.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(
-            text = "Mi Perfil",
-            style = MaterialTheme.typography.headlineMedium
+            text = estado.nombreUsuario,
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(25.dp))
+        Text(
+            text = estado.correoUsuario,
+            color = Color.Gray,
+            fontSize = 15.sp
+        )
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(6.dp)
-        ) {
+        Spacer(modifier = Modifier.height(30.dp))
 
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
+        TarjetaDato(
+            icono = Icons.Default.EmojiEvents,
+            titulo = "Puntaje total",
+            valor = estado.puntajeTotal.toString(),
+            color = tarjeta,
+            colorIcono = verde
+        )
 
-                Text(
-                    text = "Nombre",
-                    style = MaterialTheme.typography.titleMedium
-                )
+        Spacer(modifier = Modifier.height(12.dp))
 
-                Text(estado.nombreUsuario)
+        TarjetaDato(
+            icono = Icons.Default.Groups,
+            titulo = "Grupos",
+            valor = estado.cantidadGrupos.toString(),
+            color = tarjeta,
+            colorIcono = verde
+        )
 
-                Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text = "Correo",
-                    style = MaterialTheme.typography.titleMedium
-                )
+        TarjetaDato(
+            icono = Icons.Default.SportsSoccer,
+            titulo = "Pronósticos",
+            valor = estado.cantidadPronosticos.toString(),
+            color = tarjeta,
+            colorIcono = verde
+        )
 
-                Text(estado.correoUsuario)
+        Spacer(modifier = Modifier.height(24.dp))
 
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(
-                    text = "Puntaje acumulado",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text("${estado.puntajeTotal}")
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(
-                    text = "Cantidad de grupos",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text("${estado.cantidadGrupos}")
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(
-                    text = "Cantidad de pronósticos",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Text("${estado.cantidadPronosticos}")
-
-            }
-
-        }
+        Text(
+            text = "● Sesión iniciada",
+            color = Color(0xFF4CAF50),
+            fontWeight = FontWeight.Bold
+        )
 
         Spacer(modifier = Modifier.height(30.dp))
 
         Button(
-            onClick = onCerrarSesion
+            onClick = onCerrarSesion,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFC62828)
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                "CERRAR SESIÓN",
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+
+    }
+
+}
+
+@Composable
+fun TarjetaDato(
+    icono: androidx.compose.ui.graphics.vector.ImageVector,
+    titulo: String,
+    valor: String,
+    color: Color,
+    colorIcono: Color
+) {
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = color),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
 
-            Text("Cerrar sesión")
+            Icon(
+                icono,
+                contentDescription = null,
+                tint = colorIcono,
+                modifier = Modifier.size(32.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+
+                Text(
+                    titulo,
+                    color = Color.LightGray,
+                    fontSize = 14.sp
+                )
+
+                Text(
+                    valor,
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+            }
 
         }
 

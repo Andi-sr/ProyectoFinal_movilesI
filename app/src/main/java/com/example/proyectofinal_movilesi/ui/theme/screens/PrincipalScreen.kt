@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.LocationOn
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaState
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 
@@ -30,8 +31,9 @@ fun PrincipalScreen(
     viewModel: QuinielaViewModel,
     onNavegarMisGrupos: () -> Unit,
     onNavegarPartidos: () -> Unit,
+    onNavegarMapa: () -> Unit,
     onNavegarPerfil: () -> Unit
-) {
+){
 
     LaunchedEffect(Unit) {
         viewModel.cargarDatosPrincipales()
@@ -76,6 +78,21 @@ fun PrincipalScreen(
                     label = { Text("Perfil") },
                     selected = false,
                     onClick = onNavegarPerfil
+                )
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            Icons.Default.LocationOn,
+                            contentDescription = "Mapa"
+                        )
+                    },
+                    label = {
+                        Text("Mapa")
+                    },
+                    selected = false,
+                    onClick = {
+                        onNavegarMapa()
+                    }
                 )
             }
         }

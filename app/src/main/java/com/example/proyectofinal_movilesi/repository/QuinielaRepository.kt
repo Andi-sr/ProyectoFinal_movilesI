@@ -70,13 +70,14 @@ class QuinielaRepository(
     suspend fun obtenerPerfil(token: String): PerfilResponse {
         return api.obtenerPerfil("Bearer $token")
     }
+
     suspend fun registrarPrediccion(
         token: String,
         partidoId: Int,
         golesLocal: Int,
         golesVisitante: Int
     ) {
-        api.registrarPrediccion(
+        val response = api.registrarPrediccion(
             token = "Bearer $token",
             request = com.example.proyectofinal_movilesi.data.PrediccionRequest(
                 match_id = partidoId,
@@ -84,5 +85,11 @@ class QuinielaRepository(
                 away_score = golesVisitante
             )
         )
+
+        if (!response.isSuccessful) {
+            throw Exception(
+                "Error ${response.code()} : ${response.errorBody()?.string()}"
+            )
+        }
     }
 }

@@ -29,6 +29,9 @@ fun DetallePartidoScreen(
     // Variables temporales para el selector de goles
     var golesLocal by remember { mutableIntStateOf(0) }
     var golesVisitante by remember { mutableIntStateOf(0) }
+    val partido = viewModel.estado.collectAsState().value
+        .listaCompletaPartidos
+        .find { it.id == partidoId }
 
     Column(
         modifier = Modifier
@@ -42,8 +45,12 @@ fun DetallePartidoScreen(
         }
 
         Text("Detalle del Partido", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Text("Partido #$partidoId", color = Color(0xFFA5D6A7), fontSize = 14.sp, modifier = Modifier.padding(bottom = 32.dp))
-
+        Text(
+            "${partido?.home_team ?: ""} vs ${partido?.away_team ?: ""}",
+            color = Color(0xFFA5D6A7),
+            fontSize = 14.sp,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
         // TARJETA DE PRONÓSTICO
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -62,8 +69,12 @@ fun DetallePartidoScreen(
                     // EQUIPO LOCAL
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(modifier = Modifier.size(60.dp).clip(CircleShape).background(Color(0xFF2E4035))) {
-                            Text("LOC", modifier = Modifier.align(Alignment.Center), color = Color.White, fontWeight = FontWeight.Bold)
-                        }
+                            Text(
+                                partido?.home_team ?: "LOCAL",
+                                modifier = Modifier.align(Alignment.Center),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )}
                         Spacer(modifier = Modifier.height(16.dp))
                         SelectorGoles(goles = golesLocal, onCambiarGoles = { golesLocal = it })
                     }
@@ -73,8 +84,12 @@ fun DetallePartidoScreen(
                     // EQUIPO VISITANTE
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(modifier = Modifier.size(60.dp).clip(CircleShape).background(Color(0xFF2E4035))) {
-                            Text("VIS", modifier = Modifier.align(Alignment.Center), color = Color.White, fontWeight = FontWeight.Bold)
-                        }
+                            Text(
+                                partido?.away_team ?: "VISITA",
+                                modifier = Modifier.align(Alignment.Center),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )}
                         Spacer(modifier = Modifier.height(16.dp))
                         SelectorGoles(goles = golesVisitante, onCambiarGoles = { golesVisitante = it })
                     }
@@ -85,13 +100,15 @@ fun DetallePartidoScreen(
                 // BOTÓN GUARDAR
                 Button(
                     onClick = {
-                        // Aquí llamaremos al ViewModel para guardar la predicción
+                        onVolver()
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("GUARDAR PRONÓSTICO", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text("GUARDAR PRONÓSTICO")
                 }
             }
         }

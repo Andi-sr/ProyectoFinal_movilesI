@@ -46,7 +46,7 @@ interface QuinielaApi {
     suspend fun registrarPrediccion(
         @Header("Authorization") token: String,
         @Body request: PrediccionRequest
-    ): PrediccionResponse
+    ): retrofit2.Response<PrediccionResponse>
 
     // 3. Obtener todas las predicciones del usuario [cite: 154]
     @GET("api/predictions/me")
