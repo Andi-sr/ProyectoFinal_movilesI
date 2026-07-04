@@ -92,4 +92,7 @@ class QuinielaRepository(
             )
         }
     }
+    suspend fun cerrarSesion() {
+        dataStoreManager.borrarSesion()
+    }
 }

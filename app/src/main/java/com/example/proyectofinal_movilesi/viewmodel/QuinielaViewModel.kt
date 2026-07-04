@@ -206,4 +206,17 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
             }
         }
     }
+    fun cerrarSesion(onExito: () -> Unit) {
+
+        viewModelScope.launch {
+
+            repositorio.cerrarSesion()
+
+            _estado.value = QuinielaState()
+
+            onExito()
+
+        }
+
+    }
 }

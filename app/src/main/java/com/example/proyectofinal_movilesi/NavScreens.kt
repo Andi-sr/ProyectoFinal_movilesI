@@ -131,11 +131,17 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
             PerfilScreen(
                 estado = estado,
                 onCerrarSesion = {
-                    navController.navigate("login") {
-                        popUpTo("principal") {
-                            inclusive = true
+
+                    viewModel.cerrarSesion {
+
+                        navController.navigate("login") {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
                         }
+
                     }
+
                 }
             )
 

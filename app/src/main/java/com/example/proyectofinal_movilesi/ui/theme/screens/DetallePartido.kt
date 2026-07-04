@@ -48,9 +48,73 @@ fun DetallePartidoScreen(
         Text(
             "${partido?.home_team ?: ""} vs ${partido?.away_team ?: ""}",
             color = Color(0xFFA5D6A7),
-            fontSize = 14.sp,
-            modifier = Modifier.padding(bottom = 32.dp)
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1B2A22)
+            ),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    "Fecha: ${partido?.match_date?.take(10) ?: "-"}",
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "Hora: ${partido?.match_date?.drop(11)?.take(5) ?: "-"}",
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "Fase: ${partido?.phase ?: "-"}",
+                    color = Color.White
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "Estado: ${partido?.status ?: "-"}",
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                if (partido?.home_score != null && partido.away_score != null) {
+
+                    Text(
+                        "Resultado oficial",
+                        color = Color(0xFFA5D6A7),
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        "${partido.home_score} - ${partido.away_score}",
+                        color = Color.White,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                }
+
+            }
+
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
         // TARJETA DE PRONÓSTICO
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -59,7 +123,13 @@ fun DetallePartidoScreen(
         ) {
             Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("REGISTRA TU PRONÓSTICO", color = Color.Gray, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    "Pronóstico actual: $golesLocal - $golesVisitante",
+                    color = Color(0xFFA5D6A7),
+                    fontSize = 13.sp
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -98,7 +168,10 @@ fun DetallePartidoScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 // BOTÓN GUARDAR
+                val partidoFinalizado =
+                    partido?.home_score != null && partido.away_score != null
                 Button(
+                    enabled = !partidoFinalizado,
                     onClick = {
                         onVolver()
                     },
@@ -108,7 +181,23 @@ fun DetallePartidoScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF388E3C)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("GUARDAR PRONÓSTICO")
+                    Text(
+                        "GUARDAR PRONÓSTICO",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    if (partidoFinalizado) {
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            "Este partido ya finalizó. El pronóstico ya no puede modificarse.",
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                    }
                 }
             }
         }

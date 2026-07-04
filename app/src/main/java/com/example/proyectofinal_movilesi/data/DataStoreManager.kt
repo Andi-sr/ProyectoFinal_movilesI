@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+
 // Creamos la instancia del DataStore
 private val Context.dataStore by preferencesDataStore(name = "sesion_quiniela")
 
@@ -32,4 +33,11 @@ class DataStoreManager(private val context: Context) {
     val tokenGuardado: Flow<String?> = context.dataStore.data.map { preferencias ->
         preferencias[CLAVE_TOKEN]
     }
+    // Función para cerrar sesión
+    suspend fun borrarSesion() {
+        context.dataStore.edit { preferencias ->
+            preferencias.clear()
+        }
+    }
+
 }
