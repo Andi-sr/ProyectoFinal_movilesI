@@ -14,6 +14,8 @@ data class QuinielaState(
     val nombreUsuario: String = "",
     val correoUsuario: String = "",
     val puntajeTotal: Int = 0,
+    val cantidadGrupos: Int = 0,
+    val cantidadPronosticos: Int = 0,
 
 
     val listaDeGrupos: List<GrupoResponse> = emptyList(),

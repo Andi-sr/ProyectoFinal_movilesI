@@ -30,6 +30,7 @@ fun PrincipalScreen(
     viewModel: QuinielaViewModel,
     onNavegarMisGrupos: () -> Unit,
     onNavegarPartidos: () -> Unit,
+    onNavegarPerfil: () -> Unit
 ) {
 
     LaunchedEffect(Unit) {
@@ -74,7 +75,7 @@ fun PrincipalScreen(
                     icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
                     label = { Text("Perfil") },
                     selected = false,
-                    onClick = { }
+                    onClick = onNavegarPerfil
                 )
             }
         }

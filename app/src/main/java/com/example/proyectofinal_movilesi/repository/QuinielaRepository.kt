@@ -13,9 +13,9 @@ import com.example.proyectofinal_movilesi.data.entities.GrupoEntity
 import com.example.proyectofinal_movilesi.data.entities.PartidoEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-
+import com.example.proyectofinal_movilesi.data.PerfilResponse
 class QuinielaRepository(
-    val api: QuinielaApi, // ¡Aquí quitamos el private!
+    val api: QuinielaApi,
     private val grupoDao: GrupoDao,
     private val partidoDao: PartidoDao,
     private val usuarioDao: UsuarioDao,
@@ -67,4 +67,22 @@ class QuinielaRepository(
 
     suspend fun crearGrupo(token: String, nombreGrupo: String) = api.crearGrupo("Bearer $token", CrearGrupoRequest(nombreGrupo))
     suspend fun unirseAGrupo(token: String, codigoInvitacion: String) = api.unirseAGrupo("Bearer $token", UnirseGrupoRequest(codigoInvitacion))
+    suspend fun obtenerPerfil(token: String): PerfilResponse {
+        return api.obtenerPerfil("Bearer $token")
+    }
+    suspend fun registrarPrediccion(
+        token: String,
+        partidoId: Int,
+        golesLocal: Int,
+        golesVisitante: Int
+    ) {
+        api.registrarPrediccion(
+            token = "Bearer $token",
+            request = com.example.proyectofinal_movilesi.data.PrediccionRequest(
+                match_id = partidoId,
+                home_score = golesLocal,
+                away_score = golesVisitante
+            )
+        )
+    }
 }

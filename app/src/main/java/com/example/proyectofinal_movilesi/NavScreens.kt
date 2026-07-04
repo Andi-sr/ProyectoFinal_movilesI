@@ -16,7 +16,7 @@ import com.example.proyectofinal_movilesi.screens.MisGruposScreen
 import com.example.proyectofinal_movilesi.screens.PartidosScreen
 import com.example.proyectofinal_movilesi.screens.PrincipalScreen // Tu pantalla intacta
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
-
+import com.example.proyectofinal_movilesi.screens.PerfilScreen
 @Composable
 fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
     val navController = rememberNavController()
@@ -32,6 +32,7 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
     }
 
     NavHost(navController = navController, startDestination = "login") {
+
 
         // 1. LOGIN
         composable("login") {
@@ -51,8 +52,15 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
             PrincipalScreen(
                 estado = estado,
                 viewModel = viewModel,
-                onNavegarMisGrupos = { navController.navigate("mis_grupos") },
-                onNavegarPartidos = { navController.navigate("partidos") }
+                onNavegarMisGrupos = {
+                    navController.navigate("mis_grupos")
+                },
+                onNavegarPartidos = {
+                    navController.navigate("partidos")
+                },
+                onNavegarPerfil = {
+                    navController.navigate("perfil")
+                }
             )
         }
 
@@ -113,6 +121,21 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
                 }
             )
         }
+        composable("perfil") {
+
+            PerfilScreen(
+                estado = estado,
+                onCerrarSesion = {
+                    navController.navigate("login") {
+                        popUpTo("principal") {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+
+        }
 
     }
+
 }

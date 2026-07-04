@@ -33,7 +33,6 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
             }
         }
     }
-    // -------------------------------------------------------------------------
 
     fun iniciarSesion(correo: String, contrasenia: String) {
         if (correo.isBlank() || contrasenia.isBlank()) {
@@ -47,7 +46,7 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
             try {
                 val respuesta = repositorio.autenticarUsuario(correo, contrasenia)
 
-                // --- NUEVO: ESTA ES LA LÍNEA QUE BORRÉ Y QUE GUARDA TU SESIÓN ---
+                // GUARDA SESIÓN
                 repositorio.guardarSesion(respuesta.token, respuesta.name, respuesta.email)
 
                 _estado.value = _estado.value.copy(
@@ -78,10 +77,10 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
                 // 1. Guarda todo en la base de datos
                 repositorio.sincronizarDatosPrincipales(token)
 
-                // 2. Carga los grupos para la pantalla
+                // 2. Carga los grupos para la pantalla Y EL PERFIL
                 cargarMisGrupos(token)
-
-                // --- NUEVO: Cargamos los partidos para la pantalla ---
+                cargarPerfil()
+                // Cargamos los partidos para la pantalla
                 val partidos = repositorio.api.obtenerProximosPartidos("Bearer $token")
                 _estado.value = _estado.value.copy(
                     listaProximosPartidos = partidos,
@@ -148,6 +147,30 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
                 _estado.value = _estado.value.copy(listaCompletaPartidos = partidos)
             } catch (e: Exception) {
                 android.util.Log.e("ERROR_MATCHES", "No se pudo cargar el calendario", e)
+            }
+        }
+    }
+    fun cargarPerfil() {
+        val token = _estado.value.tokenAcceso ?: return
+
+        viewModelScope.launch {
+            try {
+                val perfil = repositorio.obtenerPerfil(token)
+
+                _estado.value = _estado.value.copy(
+                    nombreUsuario = perfil.name,
+                    correoUsuario = perfil.email,
+                    puntajeTotal = perfil.total_score,
+                    cantidadGrupos = perfil.groups_count,
+                    cantidadPronosticos = perfil.predictions_count
+                )
+
+            } catch (e: Exception) {
+                android.util.Log.e(
+                    "ERROR_PROFILE",
+                    "No se pudo obtener el perfil",
+                    e
+                )
             }
         }
     }
