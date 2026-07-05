@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +23,7 @@ import com.example.proyectofinal_movilesi.viewmodel.QuinielaState
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+import androidx.compose.foundation.lazy.items
 
 val ColorFondoPartidos = Color(0xFF121A16)
 val ColorTarjetaPartido = Color(0xFF1B2A22)
@@ -38,17 +38,20 @@ fun PartidosScreen(
     viewModel: QuinielaViewModel,
     onNavegarDetallePartido: (Int) -> Unit
 ) {
+    // AQUÍ ESTÁ EL CICLO DE TIEMPO REAL
     LaunchedEffect(Unit) {
         viewModel.cargarTodosLosPartidos()
+        while(true) {
+            kotlinx.coroutines.delay(30000) // Actualiza cada 30 segundos
+            viewModel.sincronizarPartidosEnTiempoReal()
+        }
     }
 
-    // VARIABLES DE ESTADO
     var faseSeleccionada by remember { mutableStateOf("Todos") }
     var estadoSeleccionado by remember { mutableStateOf("Todos") }
     var indiceSemanaSeleccionada by remember { mutableIntStateOf(0) }
     var fechaSeleccionada by remember { mutableStateOf<LocalDate?>(null) }
 
-    // Generador de Semanas del Torneo
     val semanasTorneo = remember {
         val inicio = LocalDate.of(2026, 6, 11)
         val fin = LocalDate.of(2026, 7, 19)
@@ -57,10 +60,7 @@ fun PartidosScreen(
         todosLosDias.chunked(7)
     }
 
-    // LÓGICA DE FILTRADO
     val partidosFiltrados = estado.listaCompletaPartidos.filter { partido ->
-
-        // 1. Filtro Fase
         val pasaFase = if (faseSeleccionada == "Todos") {
             true
         } else {
@@ -75,14 +75,12 @@ fun PartidosScreen(
             }
         }
 
-        // 2. Filtro Fecha
         val pasaFecha = if (fechaSeleccionada == null) {
             true
         } else {
             partido.match_date.startsWith(fechaSeleccionada.toString())
         }
 
-        // 3. Filtro Estado
         val pasaEstado = if (estadoSeleccionado == "Todos") {
             true
         } else {
@@ -113,7 +111,6 @@ fun PartidosScreen(
                     fechaSeleccionada = null
                 }
             },
-
             semanasGeneradas = semanasTorneo,
             semanaActualIndex = indiceSemanaSeleccionada,
             onCambiarSemana = { nuevaSemana ->
@@ -121,7 +118,6 @@ fun PartidosScreen(
                 fechaSeleccionada = null
                 faseSeleccionada = "Todos"
             },
-
             fechaActual = fechaSeleccionada,
             onCambiarFecha = {
                 fechaSeleccionada = if (fechaSeleccionada == it) null else it
@@ -129,7 +125,6 @@ fun PartidosScreen(
                     faseSeleccionada = "Todos"
                 }
             },
-
             estadoActual = estadoSeleccionado,
             onCambiarEstado = { estadoSeleccionado = it }
         )
@@ -155,6 +150,7 @@ fun PartidosScreen(
             items(partidosFiltrados) { partido ->
                 TarjetaPartidoUI(
                     partido = partido,
+                    estado = estado,
                     onClick = { onNavegarDetallePartido(partido.id) }
                 )
             }
@@ -175,7 +171,6 @@ fun FiltrosSuperiores(
     onCambiarEstado: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-
         LazyRow(
             modifier = Modifier.padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -278,7 +273,11 @@ fun TarjetaFechaFiltro(fecha: LocalDate, seleccionado: Boolean, onClick: () -> U
 }
 
 @Composable
-fun TarjetaPartidoUI(partido: PartidoResponse, onClick: () -> Unit) {
+fun TarjetaPartidoUI(partido: PartidoResponse, estado: QuinielaState, onClick: () -> Unit) {
+
+    // Buscamos si el usuario tiene una predicción para este partido
+    val prediccionPrevia = estado.misPredicciones.find { it.match_id == partido.id }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -340,8 +339,6 @@ fun TarjetaPartidoUI(partido: PartidoResponse, onClick: () -> Unit) {
                 }
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-
-                    // LÓGICA DE RESULTADOS AQUÍ
                     if (partido.home_score != null && partido.away_score != null) {
                         Text("${partido.home_score} - ${partido.away_score}", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
                     } else {
@@ -350,7 +347,13 @@ fun TarjetaPartidoUI(partido: PartidoResponse, onClick: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(8.dp))
                     Box(modifier = Modifier.background(Color(0xFF2E4035), RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 4.dp)) {
-                        Text("Predicción: -", color = ColorAcentoVerde, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        // MOSTRAMOS LA PREDICCIÓN REAL AQUÍ
+                        val textoPrediccion = if (prediccionPrevia != null) {
+                            "${prediccionPrevia.home_score} - ${prediccionPrevia.away_score}"
+                        } else {
+                            "-"
+                        }
+                        Text("Predicción: $textoPrediccion", color = ColorAcentoVerde, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 

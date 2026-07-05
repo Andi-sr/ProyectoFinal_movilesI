@@ -54,6 +54,15 @@ interface QuinielaApi {
         @Header("Authorization") token: String
     ): List<PrediccionResponse>
 
+
+    @GET("api/matches/updates")
+    suspend fun obtenerActualizacionesPartidos(
+        @Header("Authorization") token: String
+    ): List<PartidoResponse>
+
+    @GET("api/stadiums")
+    suspend fun obtenerEstadios(@Header("Authorization") token: String): List<EstadioResponse>
+
 }
 
 
@@ -70,7 +79,8 @@ data class PartidoResponse(
     val phase: String,
     val status: String,
     val home_score: Int? = null,
-    val away_score: Int? = null
+    val away_score: Int? = null,
+    val stadium_id: Int? = null
 )
 
 data class CrearGrupoRequest(val name: String)
@@ -101,5 +111,15 @@ data class PrediccionResponse(
     val away_score: Int,
     val status: String? = null,
     val points_earned: Int? = null
+)
+
+data class EstadioResponse(
+    val id: Int,
+    val name: String,
+    val city: String,
+    val country: String,
+    val capacity: Int,
+    val latitude: Double,
+    val longitude: Double
 )
 

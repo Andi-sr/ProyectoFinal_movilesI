@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
@@ -20,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.filled.LocationOn
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaState
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 
@@ -31,7 +31,7 @@ fun PrincipalScreen(
     viewModel: QuinielaViewModel,
     onNavegarMisGrupos: () -> Unit,
     onNavegarPartidos: () -> Unit,
-    onNavegarMapa: () -> Unit,
+    onNavegarMapa: () -> Unit, // RESTAURADO
     onNavegarPerfil: () -> Unit
 ){
 
@@ -73,26 +73,18 @@ fun PrincipalScreen(
                     selected = false,
                     onClick = onNavegarPartidos
                 )
+                // RESTAURADO EL BOTÓN DE MAPA
+                NavigationBarItem(
+                    icon = { Icon(Icons.Default.LocationOn, contentDescription = "Mapa") },
+                    label = { Text("Mapa") },
+                    selected = false,
+                    onClick = onNavegarMapa
+                )
                 NavigationBarItem(
                     icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
                     label = { Text("Perfil") },
                     selected = false,
                     onClick = onNavegarPerfil
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            Icons.Default.LocationOn,
-                            contentDescription = "Mapa"
-                        )
-                    },
-                    label = {
-                        Text("Mapa")
-                    },
-                    selected = false,
-                    onClick = {
-                        onNavegarMapa()
-                    }
                 )
             }
         }
@@ -208,8 +200,6 @@ fun PrincipalScreen(
                                 Text("VS", color = Color.Gray, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
                                 Text(partido.away_team.uppercase(), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                             }
-
-
                         }
                     }
                 }

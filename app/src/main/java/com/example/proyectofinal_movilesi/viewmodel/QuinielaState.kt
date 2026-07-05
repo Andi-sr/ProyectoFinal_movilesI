@@ -1,7 +1,9 @@
 package com.example.proyectofinal_movilesi.viewmodel
 
+import com.example.proyectofinal_movilesi.data.EstadioResponse
 import com.example.proyectofinal_movilesi.data.GrupoResponse
 import com.example.proyectofinal_movilesi.data.PartidoResponse
+import com.example.proyectofinal_movilesi.data.PrediccionResponse
 
 data class QuinielaState(
     val estaCargando: Boolean = false,
@@ -24,6 +26,9 @@ data class QuinielaState(
     val listaCompletaPartidos: List<PartidoResponse> = emptyList(),
     val listaFiltradaPartidos: List<PartidoResponse> = emptyList(),
 
-    // Nueva variable para mostrar el detalle del grupo
-    val grupoSeleccionado: GrupoResponse? = null
+
+    val grupoSeleccionado: GrupoResponse? = null,
+
+    val misPredicciones: List<PrediccionResponse> = emptyList(),
+    val listaEstadios: List<EstadioResponse> = emptyList(),
 )

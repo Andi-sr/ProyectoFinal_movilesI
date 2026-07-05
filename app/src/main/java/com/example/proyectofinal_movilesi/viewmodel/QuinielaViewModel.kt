@@ -13,7 +13,6 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
     private val _estado = MutableStateFlow(QuinielaState())
     val estado: StateFlow<QuinielaState> = _estado.asStateFlow()
 
-    // --- NUEVO: Esto se ejecuta apenas se abre la app para recordar la sesión ---
     init {
         verificarSesionGuardada()
         cargarDatosPrincipales()
@@ -150,6 +149,34 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
             }
         }
     }
+
+    fun sincronizarPartidosEnTiempoReal() {
+        val token = _estado.value.tokenAcceso ?: return
+        viewModelScope.launch {
+            try {
+                // Intentamos obtener las actualizaciones
+                val actualizaciones = repositorio.api.obtenerActualizacionesPartidos("Bearer $token")
+
+                if (actualizaciones.isNotEmpty()) {
+                    val listaActual = _estado.value.listaCompletaPartidos.toMutableList()
+
+                    actualizaciones.forEach { partidoActualizado ->
+                        val index = listaActual.indexOfFirst { it.id == partidoActualizado.id }
+                        if (index != -1) {
+                            listaActual[index] = partidoActualizado
+                        } else {
+                            listaActual.add(partidoActualizado)
+                        }
+                    }
+                    _estado.value = _estado.value.copy(listaCompletaPartidos = listaActual)
+                }
+            } catch (e: com.google.gson.JsonSyntaxException) {
+                android.util.Log.e("TIEMPO_REAL", "La API no devolvió una lista JSON válida", e)
+            } catch (e: Exception) {
+                android.util.Log.e("TIEMPO_REAL", "Fallo de conexión en segundo plano", e)
+            }
+        }
+    }
     fun cargarPerfil() {
         val token = _estado.value.tokenAcceso ?: return
 
@@ -178,12 +205,14 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
         partidoId: Int,
         golesLocal: Int,
         golesVisitante: Int,
-        onExito: () -> Unit
+        onExito: () -> Unit,
+        onError: (String) -> Unit
     ) {
         val token = _estado.value.tokenAcceso ?: return
 
         viewModelScope.launch {
             try {
+                // 1. Enviamos el pronóstico a la API
                 repositorio.registrarPrediccion(
                     token = token,
                     partidoId = partidoId,
@@ -191,18 +220,33 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
                     golesVisitante = golesVisitante
                 )
 
-                onExito()
+                val prediccionesActualizadas = repositorio.api.obtenerMisPredicciones("Bearer $token")
 
+                _estado.value = _estado.value.copy(misPredicciones = prediccionesActualizadas)
+
+                onExito()
             } catch (e: Exception) {
                 e.printStackTrace()
+                android.util.Log.e("PRONOSTICO_ERROR", e.message ?: "Error", e)
+                onError(e.message ?: "Error de conexión con la API")
+            }
+        }
+    }
 
-                android.util.Log.e(
-                    "PRONOSTICO_ERROR",
-                    e.message ?: "Error",
-                    e
+    fun cargarEstadiosYPredicciones() {
+        val token = _estado.value.tokenAcceso ?: return
+        viewModelScope.launch {
+            try {
+                // Descargamos las predicciones previas y las sedes
+                val predicciones = repositorio.api.obtenerMisPredicciones("Bearer $token")
+                val estadios = repositorio.api.obtenerEstadios("Bearer $token")
+
+                _estado.value = _estado.value.copy(
+                    misPredicciones = predicciones,
+                    listaEstadios = estadios
                 )
-
-                println(e.message)
+            } catch (e: Exception) {
+                android.util.Log.e("ERROR_EXTRA", "No se pudieron cargar estadios o predicciones", e)
             }
         }
     }

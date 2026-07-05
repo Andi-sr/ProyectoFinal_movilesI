@@ -14,17 +14,17 @@ import com.example.proyectofinal_movilesi.screens.DetallePartidoScreen
 import com.example.proyectofinal_movilesi.screens.LoginScreen
 import com.example.proyectofinal_movilesi.screens.MisGruposScreen
 import com.example.proyectofinal_movilesi.screens.PartidosScreen
-import com.example.proyectofinal_movilesi.screens.PrincipalScreen // Tu pantalla intacta
+import com.example.proyectofinal_movilesi.screens.PrincipalScreen
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 import com.example.proyectofinal_movilesi.screens.PerfilScreen
 import com.example.proyectofinal_movilesi.screens.MapaSedesScreen
 import com.example.proyectofinal_movilesi.screens.DetalleEstadioScreen
+
 @Composable
 fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
     val navController = rememberNavController()
     val estado by viewModel.estado.collectAsState()
 
-    // Magia de Auto-Login: Mantiene la sesión iniciada tipo Facebook/Instagram
     LaunchedEffect(estado.estaAutenticado) {
         if (estado.estaAutenticado && navController.currentDestination?.route == "login") {
             navController.navigate("principal") {
@@ -35,8 +35,6 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
 
     NavHost(navController = navController, startDestination = "login") {
 
-
-        // 1. LOGIN
         composable("login") {
             LoginScreen(
                 estado = estado,
@@ -49,7 +47,6 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
             )
         }
 
-        // 2. PRINCIPAL
         composable("principal") {
             PrincipalScreen(
                 estado = estado,
@@ -60,16 +57,15 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
                 onNavegarPartidos = {
                     navController.navigate("partidos")
                 },
-                onNavegarPerfil = {
-                    navController.navigate("perfil")
-                },
                 onNavegarMapa = {
                     navController.navigate("mapa_sedes")
+                },
+                onNavegarPerfil = {
+                    navController.navigate("perfil")
                 }
             )
         }
 
-        // 3. MIS GRUPOS
         composable("mis_grupos") {
             MisGruposScreen(
                 estado = estado,
@@ -80,7 +76,6 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
             )
         }
 
-        // 4. DETALLE DE GRUPO
         composable(
             route = "detalle_grupo/{grupoId}",
             arguments = listOf(navArgument("grupoId") { type = NavType.IntType })
@@ -123,44 +118,53 @@ fun SistemaDeNavegacion(viewModel: QuinielaViewModel) {
                 viewModel = viewModel,
                 onVolver = {
                     navController.popBackStack()
+                },
+                onVerEstadio = { estadioId ->
+                    // Navegamos pasando el ID del estadio que nos manda la pantalla del partido
+                    navController.navigate("detalle_estadio/$estadioId")
                 }
             )
         }
-        composable("perfil") {
 
+        composable("perfil") {
             PerfilScreen(
                 estado = estado,
                 onCerrarSesion = {
-
                     viewModel.cerrarSesion {
-
                         navController.navigate("login") {
                             popUpTo(0) {
                                 inclusive = true
                             }
                         }
-
                     }
-
                 }
             )
-
         }
+
         composable("mapa_sedes") {
             MapaSedesScreen(
-                onNavegarDetalleEstadio = {
-                    navController.navigate("detalle_estadio")
+                estado = estado,
+                viewModel = viewModel,
+                onNavegarDetalleEstadio = { estadioId ->
+                    navController.navigate("detalle_estadio/$estadioId")
                 }
             )
         }
-        composable("detalle_estadio") {
+
+
+        composable(
+            route = "detalle_estadio/{estadioId}",
+            arguments = listOf(navArgument("estadioId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val estadioId = backStackEntry.arguments?.getInt("estadioId") ?: 0
+
             DetalleEstadioScreen(
+                estadioId = estadioId,
+                viewModel = viewModel,
                 onVolver = {
                     navController.popBackStack()
                 }
             )
         }
-
     }
-
 }
