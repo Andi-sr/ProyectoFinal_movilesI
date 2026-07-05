@@ -24,13 +24,13 @@ interface QuinielaApi {
         @Query("next") next: Boolean = true
     ): List<PartidoResponse>
 
-    @POST("groups")
+    @POST("api/groups")
     suspend fun crearGrupo(
         @Header("Authorization") token: String,
         @Body request: CrearGrupoRequest
     ): CrearGrupoResponse
 
-    @POST("groups/join")
+    @POST("api/groups/join")
     suspend fun unirseAGrupo(
         @Header("Authorization") token: String,
         @Body request: UnirseGrupoRequest

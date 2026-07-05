@@ -1,6 +1,7 @@
 package com.example.proyectofinal_movilesi.screens
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -30,8 +31,10 @@ import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 fun MisGruposScreen(
     estado: QuinielaState,
     viewModel: QuinielaViewModel,
-    onNavegarDetalleGrupo: (Int) -> Unit // Función que recibe el ID
+    onNavegarDetalleGrupo: (Int) -> Unit
 ) {
+    val contexto = LocalContext.current // NECESARIO PARA LOS TOAST
+
     val colorFondo = Color(0xFF121212)
     val colorTarjeta = Color(0xFF1B2A22)
     val colorAcento = Color(0xFFA5D6A7)
@@ -99,13 +102,10 @@ fun MisGruposScreen(
                 }
             } else {
                 items(estado.listaDeGrupos) { grupo ->
-                    val contexto = LocalContext.current
-
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp)
-                            // AQUÍ CONECTAMOS EL CLICK CON LA NAVEGACIÓN
                             .clickable { onNavegarDetalleGrupo(grupo.id) },
                         colors = CardDefaults.cardColors(containerColor = colorTarjeta),
                         shape = RoundedCornerShape(16.dp)
@@ -173,7 +173,25 @@ fun MisGruposScreen(
                         TextField(value = campoTexto, onValueChange = { campoTexto = it }, placeholder = { Text("Ej. Amigos de la U") }, colors = TextFieldDefaults.colors(focusedContainerColor = colorFondoBotonOscuro, unfocusedContainerColor = colorFondoBotonOscuro, focusedTextColor = Color.White, unfocusedTextColor = Color.White))
                     }
                 },
-                confirmButton = { Button(colors = ButtonDefaults.buttonColors(containerColor = colorAcento), onClick = { if (campoTexto.isNotBlank()) { viewModel.crearNuevoGrupo(campoTexto) { mostrarDialogoCrear = false } } }) { Text("Crear", color = Color.Black, fontWeight = FontWeight.Bold) } },
+                confirmButton = {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = colorAcento),
+                        onClick = {
+                            if (campoTexto.isNotBlank()) {
+                                viewModel.crearNuevoGrupo(
+                                    nombre = campoTexto,
+                                    onExito = {
+                                        mostrarDialogoCrear = false
+                                        Toast.makeText(contexto, "Grupo creado exitosamente", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onError = { mensaje ->
+                                        Toast.makeText(contexto, "Fallo: $mensaje", Toast.LENGTH_LONG).show()
+                                    }
+                                )
+                            }
+                        }
+                    ) { Text("Crear", color = Color.Black, fontWeight = FontWeight.Bold) }
+                },
                 dismissButton = { TextButton(onClick = { mostrarDialogoCrear = false }) { Text("Cancelar", color = colorAcento) } },
                 containerColor = Color(0xFF1E1E1E)
             )
@@ -190,7 +208,25 @@ fun MisGruposScreen(
                         TextField(value = campoTexto, onValueChange = { campoTexto = it.uppercase() }, placeholder = { Text("Ej. FÚTBOL-2026") }, colors = TextFieldDefaults.colors(focusedContainerColor = colorFondoBotonOscuro, unfocusedContainerColor = colorFondoBotonOscuro, focusedTextColor = Color.White, unfocusedTextColor = Color.White))
                     }
                 },
-                confirmButton = { Button(colors = ButtonDefaults.buttonColors(containerColor = colorAcento), onClick = { if (campoTexto.isNotBlank()) { viewModel.unirseAGrupoPorCodigo(campoTexto) { mostrarDialogoUnirse = false } } }) { Text("Unirme", color = Color.Black, fontWeight = FontWeight.Bold) } },
+                confirmButton = {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(containerColor = colorAcento),
+                        onClick = {
+                            if (campoTexto.isNotBlank()) {
+                                viewModel.unirseAGrupoPorCodigo(
+                                    codigo = campoTexto,
+                                    onExito = {
+                                        mostrarDialogoUnirse = false
+                                        Toast.makeText(contexto, "Te uniste al grupo exitosamente", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onError = { mensaje ->
+                                        Toast.makeText(contexto, "Fallo: $mensaje", Toast.LENGTH_LONG).show()
+                                    }
+                                )
+                            }
+                        }
+                    ) { Text("Unirme", color = Color.Black, fontWeight = FontWeight.Bold) }
+                },
                 dismissButton = { TextButton(onClick = { mostrarDialogoUnirse = false }) { Text("Cancelar", color = colorAcento) } },
                 containerColor = Color(0xFF1E1E1E)
             )

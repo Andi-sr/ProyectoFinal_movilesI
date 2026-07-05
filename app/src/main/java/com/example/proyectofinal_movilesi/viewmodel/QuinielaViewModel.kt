@@ -110,32 +110,42 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
         }
     }
 
-    fun crearNuevoGrupo(nombre: String, onExito: () -> Unit) {
+    fun crearNuevoGrupo(nombre: String, onExito: () -> Unit, onError: (String) -> Unit) {
         val token = _estado.value.tokenAcceso ?: return
         viewModelScope.launch {
             try {
+
                 repositorio.crearGrupo(token, nombre)
-                cargarMisGrupos(token)
+
+                val grupos = repositorio.api.obtenerMisGrupos("Bearer $token")
+                _estado.value = _estado.value.copy(listaDeGrupos = grupos)
+
                 onExito()
             } catch (e: Exception) {
                 android.util.Log.e("ERROR_CREAR", "Error al crear grupo", e)
+                onError(e.message ?: "Error al intentar crear el grupo")
             }
         }
     }
 
-    fun unirseAGrupoPorCodigo(codigo: String, onExito: () -> Unit) {
+    fun unirseAGrupoPorCodigo(codigo: String, onExito: () -> Unit, onError: (String) -> Unit) {
         val token = _estado.value.tokenAcceso ?: return
         viewModelScope.launch {
             try {
+
                 repositorio.unirseAGrupo(token, codigo)
-                cargarMisGrupos(token)
+
+
+                val grupos = repositorio.api.obtenerMisGrupos("Bearer $token")
+                _estado.value = _estado.value.copy(listaDeGrupos = grupos)
+
                 onExito()
             } catch (e: Exception) {
                 android.util.Log.e("ERROR_UNIR", "Error al unirse al grupo", e)
+                onError(e.message ?: "Código inválido o error de conexión")
             }
         }
     }
-
 
     fun cargarTodosLosPartidos() {
         val token = _estado.value.tokenAcceso ?: return
