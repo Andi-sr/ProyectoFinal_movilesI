@@ -14,7 +14,7 @@
         android:theme="@style/Theme.ProyectoFinal_MovilesI"
         android:usesCleartextTraffic="true"> <meta-data
         android:name="com.google.android.geo.API_KEY"
-        android:value="AIzaSyCMjtOND838WftY2S6InrkiUVuqrjif2Ss" />
+        android:value="AIzaSyCUeRyqSgwwGcPV7JIfghRZCRjUDSmOq1I" />
 
         <activity
             android:name=".MainActivity"

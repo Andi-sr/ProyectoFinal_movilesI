@@ -2,6 +2,8 @@ package com.example.proyectofinal_movilesi.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.proyectofinal_movilesi.data.GrupoResponse
+import com.example.proyectofinal_movilesi.data.PartidoResponse
 import com.example.proyectofinal_movilesi.repository.QuinielaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +28,6 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
                         estaAutenticado = true,
                         tokenAcceso = tokenGuardado
                     )
-                    // Si ya estaba logueado, cargamos sus datos automáticamente
                     cargarDatosPrincipales()
                 }
             }
@@ -41,11 +42,8 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
 
         viewModelScope.launch {
             _estado.value = _estado.value.copy(estaCargando = true, mensajeError = null)
-
             try {
                 val respuesta = repositorio.autenticarUsuario(correo, contrasenia)
-
-                // GUARDA SESIÓN
                 repositorio.guardarSesion(respuesta.token, respuesta.name, respuesta.email)
 
                 _estado.value = _estado.value.copy(
@@ -65,29 +63,67 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
             }
         }
     }
-
     fun cargarDatosPrincipales() {
-        val token = _estado.value.tokenAcceso
-        if (token.isNullOrBlank()) return
+        val token = _estado.value.tokenAcceso ?: return
 
         viewModelScope.launch {
             _estado.value = _estado.value.copy(estaCargando = true)
             try {
-                // 1. Guarda todo en la base de datos
+                // INTENTA SINCRONIZAR CON INTERNET
                 repositorio.sincronizarDatosPrincipales(token)
 
-                // 2. Carga los grupos para la pantalla Y EL PERFIL
+                // Si tiene internet, descarga todo fresco de la API
                 cargarMisGrupos(token)
                 cargarPerfil()
-                // Cargamos los partidos para la pantalla
                 val partidos = repositorio.api.obtenerProximosPartidos("Bearer $token")
+
                 _estado.value = _estado.value.copy(
                     listaProximosPartidos = partidos,
-                    estaCargando = false
+                    estaCargando = false,
+                    modoOffline = false
                 )
             } catch (e: Exception) {
-                android.util.Log.e("ERROR_SYNC", "Error al sincronizar", e)
-                _estado.value = _estado.value.copy(estaCargando = false)
+                android.util.Log.e("OFFLINE", "Sin conexión. Activando Local-First", e)
+
+               //modo offline
+                val gruposLocal = repositorio.obtenerGruposLocales().map {
+                    GrupoResponse(it.id, it.nombre, it.participantesCount, it.userScore, it.inviteCode)
+                }
+
+                val partidosLocal = repositorio.obtenerPartidosLocales().map {
+                    PartidoResponse(it.id, it.homeTeam, it.awayTeam, it.matchDate, it.phase, it.status)
+                }
+
+                val perfilLocal = repositorio.obtenerPerfilLocal()
+
+                _estado.value = _estado.value.copy(
+                    estaCargando = false,
+                    modoOffline = true,
+                    listaDeGrupos = gruposLocal,
+                    listaProximosPartidos = partidosLocal.take(5),
+                    nombreUsuario = perfilLocal?.nombre ?: _estado.value.nombreUsuario,
+                    correoUsuario = perfilLocal?.email ?: _estado.value.correoUsuario,
+                    puntajeTotal = perfilLocal?.totalScore ?: _estado.value.puntajeTotal,
+                    cantidadGrupos = perfilLocal?.groupsCount ?: _estado.value.cantidadGrupos,
+                    cantidadPronosticos = perfilLocal?.predictionsCount ?: _estado.value.cantidadPronosticos
+                )
+            }
+        }
+    }
+
+
+    fun cargarTodosLosPartidos() {
+        val token = _estado.value.tokenAcceso ?: return
+        viewModelScope.launch {
+            try {
+                val partidos = repositorio.api.obtenerTodosLosPartidos("Bearer $token")
+                _estado.value = _estado.value.copy(listaCompletaPartidos = partidos, modoOffline = false)
+            } catch (e: Exception) {
+
+                val partidosLocal = repositorio.obtenerPartidosLocales().map {
+                    PartidoResponse(it.id, it.homeTeam, it.awayTeam, it.matchDate, it.phase, it.status)
+                }
+                _estado.value = _estado.value.copy(listaCompletaPartidos = partidosLocal, modoOffline = true)
             }
         }
     }
@@ -114,15 +150,11 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
         val token = _estado.value.tokenAcceso ?: return
         viewModelScope.launch {
             try {
-
                 repositorio.crearGrupo(token, nombre)
-
                 val grupos = repositorio.api.obtenerMisGrupos("Bearer $token")
                 _estado.value = _estado.value.copy(listaDeGrupos = grupos)
-
                 onExito()
             } catch (e: Exception) {
-                android.util.Log.e("ERROR_CREAR", "Error al crear grupo", e)
                 onError(e.message ?: "Error al intentar crear el grupo")
             }
         }
@@ -132,30 +164,12 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
         val token = _estado.value.tokenAcceso ?: return
         viewModelScope.launch {
             try {
-
                 repositorio.unirseAGrupo(token, codigo)
-
-
                 val grupos = repositorio.api.obtenerMisGrupos("Bearer $token")
                 _estado.value = _estado.value.copy(listaDeGrupos = grupos)
-
                 onExito()
             } catch (e: Exception) {
-                android.util.Log.e("ERROR_UNIR", "Error al unirse al grupo", e)
                 onError(e.message ?: "Código inválido o error de conexión")
-            }
-        }
-    }
-
-    fun cargarTodosLosPartidos() {
-        val token = _estado.value.tokenAcceso ?: return
-        viewModelScope.launch {
-            try {
-                // Llamada al endpoint GET /matches
-                val partidos = repositorio.api.obtenerTodosLosPartidos("Bearer $token")
-                _estado.value = _estado.value.copy(listaCompletaPartidos = partidos)
-            } catch (e: Exception) {
-                android.util.Log.e("ERROR_MATCHES", "No se pudo cargar el calendario", e)
             }
         }
     }
@@ -164,12 +178,9 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
         val token = _estado.value.tokenAcceso ?: return
         viewModelScope.launch {
             try {
-                // Intentamos obtener las actualizaciones
                 val actualizaciones = repositorio.api.obtenerActualizacionesPartidos("Bearer $token")
-
                 if (actualizaciones.isNotEmpty()) {
                     val listaActual = _estado.value.listaCompletaPartidos.toMutableList()
-
                     actualizaciones.forEach { partidoActualizado ->
                         val index = listaActual.indexOfFirst { it.id == partidoActualizado.id }
                         if (index != -1) {
@@ -181,19 +192,18 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
                     _estado.value = _estado.value.copy(listaCompletaPartidos = listaActual)
                 }
             } catch (e: com.google.gson.JsonSyntaxException) {
-                android.util.Log.e("TIEMPO_REAL", "La API no devolvió una lista JSON válida", e)
+                android.util.Log.e("TIEMPO_REAL", "La API devolvió un formato inesperado", e)
             } catch (e: Exception) {
                 android.util.Log.e("TIEMPO_REAL", "Fallo de conexión en segundo plano", e)
             }
         }
     }
+
     fun cargarPerfil() {
         val token = _estado.value.tokenAcceso ?: return
-
         viewModelScope.launch {
             try {
                 val perfil = repositorio.obtenerPerfil(token)
-
                 _estado.value = _estado.value.copy(
                     nombreUsuario = perfil.name,
                     correoUsuario = perfil.email,
@@ -201,44 +211,8 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
                     cantidadGrupos = perfil.groups_count,
                     cantidadPronosticos = perfil.predictions_count
                 )
-
             } catch (e: Exception) {
-                android.util.Log.e(
-                    "ERROR_PROFILE",
-                    "No se pudo obtener el perfil",
-                    e
-                )
-            }
-        }
-    }
-    fun guardarPronostico(
-        partidoId: Int,
-        golesLocal: Int,
-        golesVisitante: Int,
-        onExito: () -> Unit,
-        onError: (String) -> Unit
-    ) {
-        val token = _estado.value.tokenAcceso ?: return
-
-        viewModelScope.launch {
-            try {
-                // 1. Enviamos el pronóstico a la API
-                repositorio.registrarPrediccion(
-                    token = token,
-                    partidoId = partidoId,
-                    golesLocal = golesLocal,
-                    golesVisitante = golesVisitante
-                )
-
-                val prediccionesActualizadas = repositorio.api.obtenerMisPredicciones("Bearer $token")
-
-                _estado.value = _estado.value.copy(misPredicciones = prediccionesActualizadas)
-
-                onExito()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                android.util.Log.e("PRONOSTICO_ERROR", e.message ?: "Error", e)
-                onError(e.message ?: "Error de conexión con la API")
+                android.util.Log.e("ERROR_PROFILE", "No se pudo obtener el perfil", e)
             }
         }
     }
@@ -247,10 +221,8 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
         val token = _estado.value.tokenAcceso ?: return
         viewModelScope.launch {
             try {
-                // Descargamos las predicciones previas y las sedes
                 val predicciones = repositorio.api.obtenerMisPredicciones("Bearer $token")
                 val estadios = repositorio.api.obtenerEstadios("Bearer $token")
-
                 _estado.value = _estado.value.copy(
                     misPredicciones = predicciones,
                     listaEstadios = estadios
@@ -260,17 +232,39 @@ class QuinielaViewModel(private val repositorio: QuinielaRepository) : ViewModel
             }
         }
     }
-    fun cerrarSesion(onExito: () -> Unit) {
 
+    fun guardarPronostico(
+        partidoId: Int,
+        golesLocal: Int,
+        golesVisitante: Int,
+        onExito: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val token = _estado.value.tokenAcceso ?: return
         viewModelScope.launch {
+            try {
+                repositorio.registrarPrediccion(
+                    token = token,
+                    partidoId = partidoId,
+                    golesLocal = golesLocal,
+                    golesVisitante = golesVisitante
+                )
 
-            repositorio.cerrarSesion()
+                val prediccionesActualizadas = repositorio.api.obtenerMisPredicciones("Bearer $token")
+                _estado.value = _estado.value.copy(misPredicciones = prediccionesActualizadas)
 
-            _estado.value = QuinielaState()
-
-            onExito()
-
+                onExito()
+            } catch (e: Exception) {
+                onError(e.message ?: "Error de conexión con la API")
+            }
         }
+    }
 
+    fun cerrarSesion(onExito: () -> Unit) {
+        viewModelScope.launch {
+            repositorio.cerrarSesion()
+            _estado.value = QuinielaState()
+            onExito()
+        }
     }
 }
