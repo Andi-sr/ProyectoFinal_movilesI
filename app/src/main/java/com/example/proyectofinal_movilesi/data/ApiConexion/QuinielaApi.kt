@@ -1,5 +1,6 @@
-package com.example.proyectofinal_movilesi.data
+package com.example.proyectofinal_movilesi.data.ApiConexion
 
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -46,7 +47,7 @@ interface QuinielaApi {
     suspend fun registrarPrediccion(
         @Header("Authorization") token: String,
         @Body request: PrediccionRequest
-    ): retrofit2.Response<PrediccionResponse>
+    ): Response<PrediccionResponse>
 
     // 3. Obtener todas las predicciones del usuario [cite: 154]
     @GET("api/predictions/me")

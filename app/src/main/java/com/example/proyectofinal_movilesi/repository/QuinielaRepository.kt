@@ -3,17 +3,19 @@ package com.example.proyectofinal_movilesi.repository
 import com.example.proyectofinal_movilesi.data.DataStoreManager
 import com.example.proyectofinal_movilesi.data.GrupoDao
 
-import com.example.proyectofinal_movilesi.data.LoginRequest
+import com.example.proyectofinal_movilesi.data.ApiConexion.LoginRequest
 import com.example.proyectofinal_movilesi.data.PartidoDao
 import com.example.proyectofinal_movilesi.data.UsuarioDao
-import com.example.proyectofinal_movilesi.data.QuinielaApi
-import com.example.proyectofinal_movilesi.data.CrearGrupoRequest
-import com.example.proyectofinal_movilesi.data.UnirseGrupoRequest
+import com.example.proyectofinal_movilesi.data.ApiConexion.QuinielaApi
+import com.example.proyectofinal_movilesi.data.ApiConexion.CrearGrupoRequest
+import com.example.proyectofinal_movilesi.data.ApiConexion.UnirseGrupoRequest
 import com.example.proyectofinal_movilesi.data.entities.GrupoEntity
 import com.example.proyectofinal_movilesi.data.entities.PartidoEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.example.proyectofinal_movilesi.data.PerfilResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.PerfilResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.PrediccionRequest
+
 class QuinielaRepository(
     val api: QuinielaApi,
     private val grupoDao: GrupoDao,
@@ -27,7 +29,6 @@ class QuinielaRepository(
         dataStoreManager.guardarUsuario(token, nombre, correo)
     }
 
-    suspend fun login(correo: String, contrasenia: String) = api.login(LoginRequest(correo, contrasenia))
     suspend fun autenticarUsuario(correo: String, contrasenia: String) = api.login(LoginRequest(correo, contrasenia))
 
     suspend fun sincronizarDatosPrincipales(token: String) = withContext(Dispatchers.IO) {
@@ -37,6 +38,7 @@ class QuinielaRepository(
         grupoDao.borrarTodosLosGrupos()
         partidoDao.borrarTodosLosPartidos()
 
+        //saca información de la api y los mapea para guardar en la base de datos local
         val entidadesGrupos = respuestaGrupos.map { grupo ->
             GrupoEntity(
                 id = grupo.id,
@@ -57,6 +59,7 @@ class QuinielaRepository(
             )
         }
 
+        //datos  dao listos para guardarlo en el telefono de forma local
         grupoDao.insertarGrupos(entidadesGrupos)
         partidoDao.insertarPartidos(entidadesPartidos)
     }
@@ -79,7 +82,7 @@ class QuinielaRepository(
     ) {
         val response = api.registrarPrediccion(
             token = "Bearer $token",
-            request = com.example.proyectofinal_movilesi.data.PrediccionRequest(
+            request = PrediccionRequest(
                 match_id = partidoId,
                 home_score = golesLocal,
                 away_score = golesVisitante

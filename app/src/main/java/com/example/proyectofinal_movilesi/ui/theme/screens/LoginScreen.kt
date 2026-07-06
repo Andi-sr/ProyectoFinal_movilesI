@@ -152,7 +152,7 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = error,
-                            color = Color(0xFFB71C1C), // Un rojo más oscuro para que contraste
+                            color = Color(0xFFB71C1C),
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center
                         )

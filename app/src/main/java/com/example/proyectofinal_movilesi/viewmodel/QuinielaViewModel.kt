@@ -2,8 +2,8 @@ package com.example.proyectofinal_movilesi.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyectofinal_movilesi.data.GrupoResponse
-import com.example.proyectofinal_movilesi.data.PartidoResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.GrupoResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.PartidoResponse
 import com.example.proyectofinal_movilesi.repository.QuinielaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

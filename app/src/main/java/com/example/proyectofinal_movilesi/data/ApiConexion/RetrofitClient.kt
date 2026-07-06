@@ -1,4 +1,4 @@
-package com.example.proyectofinal_movilesi.data
+package com.example.proyectofinal_movilesi.data.ApiConexion
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

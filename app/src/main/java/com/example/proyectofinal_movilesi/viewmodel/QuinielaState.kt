@@ -1,9 +1,9 @@
 package com.example.proyectofinal_movilesi.viewmodel
 
-import com.example.proyectofinal_movilesi.data.EstadioResponse
-import com.example.proyectofinal_movilesi.data.GrupoResponse
-import com.example.proyectofinal_movilesi.data.PartidoResponse
-import com.example.proyectofinal_movilesi.data.PrediccionResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.EstadioResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.GrupoResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.PartidoResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.PrediccionResponse
 
 data class QuinielaState(
     val estaCargando: Boolean = false,
@@ -22,9 +22,7 @@ data class QuinielaState(
 
     val listaDeGrupos: List<GrupoResponse> = emptyList(),
     val listaProximosPartidos: List<PartidoResponse> = emptyList(),
-
     val listaCompletaPartidos: List<PartidoResponse> = emptyList(),
-    val listaFiltradaPartidos: List<PartidoResponse> = emptyList(),
 
 
     val grupoSeleccionado: GrupoResponse? = null,

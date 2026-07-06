@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
 import com.example.proyectofinal_movilesi.data.DataStoreManager
-import com.example.proyectofinal_movilesi.data.RetrofitClient // Importamos tu nuevo cliente
+import com.example.proyectofinal_movilesi.data.ApiConexion.RetrofitClient // Importamos tu nuevo cliente
 import com.example.proyectofinal_movilesi.data.db.QuinielaDatabase
 import com.example.proyectofinal_movilesi.repository.QuinielaRepository
 import com.example.proyectofinal_movilesi.ui.theme.ProyectoFinal_MovilesITheme

@@ -23,8 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyectofinal_movilesi.data.GrupoResponse
-import com.example.proyectofinal_movilesi.data.PartidoResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.GrupoResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.PartidoResponse
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 
 val FondoOscuro = Color(0xFF141C18)

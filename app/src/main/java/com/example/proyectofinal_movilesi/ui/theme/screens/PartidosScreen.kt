@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyectofinal_movilesi.data.PartidoResponse
+import com.example.proyectofinal_movilesi.data.ApiConexion.PartidoResponse
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaState
 import com.example.proyectofinal_movilesi.viewmodel.QuinielaViewModel
 import java.time.LocalDate
